@@ -1,14 +1,20 @@
 require('dotenv').config();
 const request = require('supertest');
+const db = require('./data/dbConfig.js');
 
 const server = require('./server.js');
 
 describe('tests', () => {
+
+    afterEach(async () => {
+        await db('students').truncate();
+    })
+
     it('process.env.PORT should be assigned to 4000', () => {
         expect(process.env.PORT).toBe("4000");
     });
 
-    it('process.eng.DB_ENV should equal testing', () => {
+    it('process.env.DB_ENV should equal testing', () => {
         expect(process.env.DB_ENV).toBe("testing")
     })
 
@@ -26,6 +32,14 @@ describe('tests', () => {
         it('should return []', async () => {
             const res = await request(server).get('/');
             expect(res.body).toEqual([])
+        });
+    });
+
+    describe('/post', () => {
+        it('should post student to db', async () => {
+            const [id] = await db('students').insert({name:'gaby'}, 'id');
+            const student = await db('students').where({id}).first()
+            expect(student.name).toBe("gaby")
         });
     });
 });
