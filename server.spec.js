@@ -18,7 +18,7 @@ describe('tests', () => {
         expect(process.env.DB_ENV).toBe("testing")
     })
 
-    describe('/get', () => {
+    describe('get', () => {
         it('should return status 200 OK', async () => {
             const res = await request(server).get('/')
             expect(res.status).toBe(200);
@@ -35,11 +35,23 @@ describe('tests', () => {
         });
     });
 
-    describe('/post', () => {
+    describe('post', () => {
         it('should post student to db', async () => {
             const [id] = await db('students').insert({name:'gaby'}, 'id');
             const student = await db('students').where({id}).first()
             expect(student.name).toBe("gaby")
         });
+
+        it('should post student using post endpoint', async () => {
+            const student = await request(server).post('/').send({name:"gaby"});
+            expect(student.status).toBe(200);
+        })
+
+        it('should delete student', async () => {
+            const student = await db('students').insert({name:"edwin"})
+            const students = await db('students')
+            // const id = await db('students').where({id:studentId});
+            expect(students).toEqual([{"id": 1, "name": "edwin"}])
+        })
     });
 });
